@@ -43,7 +43,7 @@ class _SettingsState extends State<Settings> {
               addMint: widget.addMint,
             ),
           ),
-          Expanded(
+          Flexible(
             child: ListView.builder(
               itemCount: widget.mints.length,
               itemBuilder: (BuildContext context, int index) {

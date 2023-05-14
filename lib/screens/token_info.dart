@@ -71,7 +71,7 @@ class TokenInfoState extends State<TokenInfo> {
         ),
         body: Column(
           children: [
-            Expanded(
+            Container(
               child: Column(
                 children: [
                   SizedBox(

@@ -123,7 +123,7 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-          Expanded(
+          Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -150,7 +150,7 @@ class _HomeState extends State<Home> {
                     fontSize: 20.0,
                   ),
                 ),
-                Expanded(
+                Flexible(
                   child: TransactionList(
                       transactions: widget.transactions,
                       checkSpendable: null,
@@ -162,7 +162,7 @@ class _HomeState extends State<Home> {
           Row(
             // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
+              Flexible(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 70),
@@ -183,7 +183,7 @@ class _HomeState extends State<Home> {
                   child: const Text('Send'),
                 ),
               ),
-              Expanded(
+              Flexible(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 70),

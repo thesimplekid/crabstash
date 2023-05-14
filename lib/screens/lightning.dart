@@ -72,7 +72,7 @@ class _LightningState extends State<Lightning> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+            Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -115,7 +115,7 @@ class _LightningState extends State<Lightning> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(
+                Flexible(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 70),
@@ -140,7 +140,7 @@ class _LightningState extends State<Lightning> {
                     child: const Text('Create Invoice'),
                   ),
                 ),
-                Expanded(
+                Flexible(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 70),

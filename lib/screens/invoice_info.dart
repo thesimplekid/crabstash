@@ -85,51 +85,45 @@ class InvoiceInfoState extends State<InvoiceInfo> {
         ),
         body: Column(
           children: [
-            Expanded(
+            SizedBox(
+              height: 400,
               child: Column(
                 children: [
                   SizedBox(
-                    height: 400,
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 300,
-                          child: SingleChildScrollView(
-                            child: Text(displayInvoice!.invoice!),
-                          ),
-                        ),
-                        Text("Mint: ${displayInvoice!.mintUrl}"),
-                        Wrap(
-                          children: [
-                            Text(
-                                "Invoice amount: ${displayInvoice!.amount.toString()}"),
-                          ],
-                        ), // Wrap
-                      ],
+                    height: 300,
+                    child: SingleChildScrollView(
+                      child: Text(displayInvoice!.invoice!),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () async {
-                      await Clipboard.setData(
-                          ClipboardData(text: displayInvoice!.invoice));
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Copied to clipboard'),
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text('Copy'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                    child: const Text('OK'),
-                  ),
+                  Text("Mint: ${displayInvoice!.mintUrl}"),
+                  Wrap(
+                    children: [
+                      Text(
+                          "Invoice amount: ${displayInvoice!.amount.toString()}"),
+                    ],
+                  ), // Wrap
                 ],
               ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await Clipboard.setData(
+                    ClipboardData(text: displayInvoice!.invoice));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Copied to clipboard'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Copy'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              child: const Text('OK'),
             ),
           ],
         ),
