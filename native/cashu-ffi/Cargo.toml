@@ -1,0 +1,20 @@
+[package]
+name = "cashu-ffi"
+version = "0.1.0"
+authors = ["thesimplekid <tsk@thesimplekid.com>"]
+edition = "2021"
+
+[lib]
+name = "cashu_ffi"
+crate-type = ["rlib"]
+
+[dependencies]
+cashu = { path = "../cashu" }
+tokio = { version = "1.28.0", features = ["rt-multi-thread"] } 
+ffi_helpers = "0.3"
+allo-isolate = "0.1.14"
+lazy_static = "1.4"
+
+[build-dependencies]
+cbindgen = "0.24.3"
+dart-bindgen = "0.1.8"

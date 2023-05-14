@@ -1,0 +1,18 @@
+[package]
+name = "cashu"
+version = "0.1.0"
+authors = ["thesimplkied <tsk@thesimplekid.com>"]
+edition = "2021"
+
+[dependencies]
+log = "0.4.17"
+minreq = "2.7.0"
+cashu-crab = { path = "../../../cashu-crab" }
+serde_json = "1.0.96"
+serde = "1.0.160"
+lazy_static = "1.4.0"
+tokio = { version = "1.28.0", features = ["sync"]}
+dart-sys = "4.0.2"
+allo-isolate = "0.1.14"
+bitcoin = "0.30.0"
+lightning-invoice = "0.23.0"
