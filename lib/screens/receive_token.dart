@@ -1,20 +1,34 @@
+import 'package:crabstash/shared/models/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:cashu/cashu.dart';
 
 import '../shared/models/token.dart';
 import '../shared/widgets/add_mint.dart';
+import '../screens/create_invoice.dart';
 
 class ReceviceToken extends StatefulWidget {
   final Function decodeToken;
   final Function receiveToken;
   final Function addMint;
+  final Function setInvoices;
   final Map<String, int> mints;
+  final Cashu cashu;
+  final String? activeWallet;
+  final List<LightningTransaction> pendingInvoices;
+  final List<LightningTransaction> invoices;
 
-  const ReceviceToken(
-      {super.key,
-      required this.decodeToken,
-      required this.receiveToken,
-      required this.mints,
-      required this.addMint});
+  const ReceviceToken({
+    super.key,
+    required this.decodeToken,
+    required this.activeWallet,
+    required this.pendingInvoices,
+    required this.receiveToken,
+    required this.mints,
+    required this.invoices,
+    required this.addMint,
+    required this.cashu,
+    required this.setInvoices,
+  });
 
   @override
   ReceiveTokenState createState() => ReceiveTokenState();
@@ -68,6 +82,32 @@ class ReceiveTokenState extends State<ReceviceToken> {
               },
               controller: receiveController,
             ),
+            if (tokenData == null)
+              Flexible(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 70),
+                  ),
+                  onPressed: () {
+                    if (widget.activeWallet != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CreateInvoice(
+                            cashu: widget.cashu,
+                            mints: widget.mints,
+                            activeMint: widget.activeWallet!,
+                            pendingInvoices: widget.pendingInvoices,
+                            invoices: widget.invoices,
+                            setInvoices: widget.setInvoices,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Create Invoice'),
+                ),
+              ),
             if (tokenData != null)
               Column(
                 children: [

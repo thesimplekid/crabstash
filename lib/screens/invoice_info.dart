@@ -1,3 +1,4 @@
+import 'package:crabstash/shared/models/transaction.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
@@ -8,8 +9,8 @@ class InvoiceInfo extends StatefulWidget {
   final int amount;
   final String mintUrl;
   final Invoice? invoice;
-  final List<Invoice> invoices;
-  final List<Invoice> pendingInvoices;
+  final List<LightningTransaction> invoices;
+  final List<LightningTransaction> pendingInvoices;
   final Cashu cashu;
   final Function setInvoices;
 
@@ -35,15 +36,20 @@ class InvoiceInfoState extends State<InvoiceInfo> {
     List<dynamic> result =
         await widget.cashu.requestMint(widget.amount, widget.mintUrl);
     Invoice newInvoice = Invoice(
-        status: InvoiceStatus.pending,
         invoice: result[0],
         hash: result[1].toString(),
-        time: DateTime.now(),
         amount: widget.amount,
         mintUrl: widget.mintUrl);
 
+    LightningTransaction newTransaction = LightningTransaction(
+        status: TransactionStatus.pending,
+        time: DateTime.now(),
+        mintUrl: widget.mintUrl,
+        amount: widget.amount,
+        invoice: newInvoice);
+
     setState(() {
-      widget.pendingInvoices.add(newInvoice);
+      widget.pendingInvoices.add(newTransaction);
       displayInvoice = newInvoice;
     });
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cashu/cashu.dart';
 
 import '../screens/send_token.dart';
 import '../screens/receive_token.dart';
@@ -11,8 +12,11 @@ class Home extends StatefulWidget {
   final int balance;
   final int activeBalance;
   final String? activeMint;
-  final List<Transaction> pendingTransactions;
-  final List<Transaction> transactions;
+  final Cashu cashu;
+  final List<CashuTransaction> pendingCashuTransactions;
+  final List<CashuTransaction> cashuTransactions;
+  final List<LightningTransaction> pendingLightningTransactions;
+  final List<LightningTransaction> lightningTransactions;
   final Map<String, int> mints;
   final TokenData? tokenData;
   final Function decodeToken;
@@ -21,14 +25,19 @@ class Home extends StatefulWidget {
   final Function send;
   final Function addMint;
   final Function checkTransactionStatus;
+  final Function checkLightningTransaction;
+  final Function setInvoices;
 
   const Home(
       {super.key,
       required this.balance,
       required this.activeBalance,
       required this.activeMint,
-      required this.pendingTransactions,
-      required this.transactions,
+      required this.pendingCashuTransactions,
+      required this.cashuTransactions,
+      required this.cashu,
+      required this.pendingLightningTransactions,
+      required this.lightningTransactions,
       required this.mints,
       required this.decodeToken,
       required this.receiveToken,
@@ -36,6 +45,8 @@ class Home extends StatefulWidget {
       required this.send,
       required this.addMint,
       required this.checkTransactionStatus,
+      required this.checkLightningTransaction,
+      required this.setInvoices,
       this.tokenData});
 
   @override
@@ -53,6 +64,18 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    List<Transaction> transactions = [
+      ...widget.cashuTransactions,
+      ...widget.lightningTransactions
+    ];
+    transactions.sort((a, b) => a.time.compareTo(b.time));
+
+    List<Transaction> pendingTransactions = [
+      ...widget.pendingCashuTransactions,
+      ...widget.pendingLightningTransactions
+    ];
+    pendingTransactions.sort((a, b) => a.time.compareTo(b.time));
+
     return Scaffold(
       body: Column(
         children: [
@@ -127,7 +150,7 @@ class _HomeState extends State<Home> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.pendingTransactions.isNotEmpty)
+                if (pendingTransactions.isNotEmpty)
                   // crossAxisAlignment: CrossAxisAlignment.start,
                   const Text(
                     "Pending Transactions",
@@ -135,12 +158,14 @@ class _HomeState extends State<Home> {
                       fontSize: 20.0,
                     ),
                   ),
-                if (widget.pendingTransactions.isNotEmpty)
+                if (pendingTransactions.isNotEmpty)
                   Flexible(
                     child: TransactionList(
-                      transactions: widget.pendingTransactions,
+                      transactions: pendingTransactions,
                       checkSpendable: widget.checkTransactionStatus,
+                      checkLightingPaid: widget.checkLightningTransaction,
                       sendToken: _sendTokenDialog,
+                      lightningDialog: _createLightningDialog,
                     ),
                   ),
                 const Text(
@@ -152,8 +177,9 @@ class _HomeState extends State<Home> {
                 ),
                 Flexible(
                   child: TransactionList(
-                      transactions: widget.transactions,
+                      transactions: transactions,
                       checkSpendable: null,
+                      lightningDialog: _createLightningDialog,
                       sendToken: _sendTokenDialog),
                 ),
               ],
@@ -194,6 +220,11 @@ class _HomeState extends State<Home> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReceviceToken(
+                          activeWallet: widget.activeMint,
+                          cashu: widget.cashu,
+                          setInvoices: widget.setInvoices,
+                          invoices: widget.lightningTransactions,
+                          pendingInvoices: widget.pendingLightningTransactions,
                           decodeToken: widget.decodeToken,
                           receiveToken: widget.receiveToken,
                           mints: widget.mints,
@@ -211,6 +242,63 @@ class _HomeState extends State<Home> {
       ), // Body column
     );
   } // Build widget
+
+  void _createLightningDialog(int amount, String mintUrl,
+      LightningTransaction passedTransaction) async {
+    if (context.mounted) {
+      // TODO Decode invoice
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Send'),
+            content: SizedBox(
+              height: 200,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 50,
+                    child: SingleChildScrollView(
+                      child: Text(passedTransaction.invoice.invoice!),
+                    ),
+                  ),
+                  Wrap(
+                    children: [
+                      Text(
+                        "Invoice ${passedTransaction.amount.toString()}",
+                      ), // Mint Text
+                    ],
+                  ), // Wrap
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await Clipboard.setData(
+                      ClipboardData(text: passedTransaction.invoice.invoice));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Copied to clipboard'),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Copy'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   void _sendTokenDialog(int amount, TokenData? token) async {
     late TokenData tokenData;
@@ -281,14 +369,17 @@ class _HomeState extends State<Home> {
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
   final Function? checkSpendable;
+  final Function? checkLightingPaid;
   final Function sendToken;
+  final Function lightningDialog;
 
-  const TransactionList({
-    super.key,
-    required this.transactions,
-    required this.checkSpendable,
-    required this.sendToken,
-  });
+  const TransactionList(
+      {super.key,
+      required this.transactions,
+      this.checkSpendable,
+      this.checkLightingPaid,
+      required this.sendToken,
+      required this.lightningDialog});
 
   @override
   Widget build(BuildContext context) {
@@ -306,7 +397,7 @@ class TransactionList extends StatelessWidget {
             case TransactionStatus.sent:
               statusIcon = Icons.call_made;
               amountText = Text(
-                "${transaction.token.amount} sats",
+                "${transaction.amount} sats",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w100,
@@ -317,7 +408,7 @@ class TransactionList extends StatelessWidget {
             case TransactionStatus.received:
               statusIcon = Icons.call_received;
               amountText = Text(
-                "${transaction.token.amount} sats",
+                "${transaction.amount} sats",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w100,
@@ -327,7 +418,7 @@ class TransactionList extends StatelessWidget {
               break;
             default:
               amountText = Text(
-                "${transaction.token.amount} sats",
+                "${transaction.amount} sats",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w100,
@@ -338,24 +429,35 @@ class TransactionList extends StatelessWidget {
 
           return GestureDetector(
             onTap: () {
-              sendToken(transaction.token.amount, transaction.token);
+              // TODO: show transaction info
+              if (transaction is CashuTransaction) {
+                sendToken(transaction.amount, transaction.token);
+              } else if (transaction is LightningTransaction) {
+                lightningDialog(
+                    transaction.amount, transaction.mintUrl, transaction);
+              }
             },
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(statusIcon),
-                if (checkSpendable != null)
+                if (checkSpendable != null || checkLightingPaid != null)
                   GestureDetector(
                     onTap: () {
-                      checkSpendable!(transaction);
+                      if (transaction is CashuTransaction) {
+                        checkSpendable!(transaction);
+                      } else if (transaction is LightningTransaction) {
+                        checkLightingPaid!(transaction);
+                      }
                     },
                     child: const Icon(Icons.refresh),
                   ),
                 const Spacer(),
                 Column(
                   children: [
-                    Text(
-                      transaction.token.memo ?? "No Memo",
+                    const Text(
+                      // TODO: Show real memo
+                      "No Memo",
                       style: const TextStyle(fontSize: 20),
                     ),
                     Text(

@@ -6,11 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'color_schemes.g.dart';
 import 'screens/home.dart';
-import 'screens/lightning.dart';
 import 'screens/settings.dart';
 import 'shared/models/transaction.dart';
 import 'shared/models/token.dart';
-import 'shared/models/invoice.dart';
 
 void main() => runApp(const MyApp());
 
@@ -50,15 +48,15 @@ class MyHomePageState extends State<MyHomePage> {
 
   TokenData? tokenData;
 
-  List<Transaction> pendingTransactions = List.empty(growable: true);
-  List<Transaction> transactions = List.empty(growable: true);
+  List<CashuTransaction> pendingCashuTransactions = List.empty(growable: true);
+  List<CashuTransaction> cashuTransactions = List.empty(growable: true);
 
-  List<Invoice> pendingInvoices = List.empty(growable: true);
-  List<Invoice> invoices = List.empty(growable: true);
+  List<LightningTransaction> pendingLightningTransactions =
+      List.empty(growable: true);
+  List<LightningTransaction> lightningTransactions = List.empty(growable: true);
 
   late List<Widget> _widgetOptions;
 
-  late Lightning _lightningTab;
   late Home _homeTab;
   late Settings _settingsTab;
 
@@ -71,9 +69,9 @@ class MyHomePageState extends State<MyHomePage> {
     _loadMints();
 
     // Load transaction
-    _loadTransactions();
+    _loadCashuTransactions();
     // Load Invoices
-    _loadInvoices();
+    _loadLightningTransactions();
 
     _getActiveMint();
 
@@ -91,30 +89,25 @@ class MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    _lightningTab = Lightning(
-      cashu: cashu,
-      activeWallet: activeMint,
-      wallets: mints,
-      pendingInvoices: pendingInvoices,
-      invoices: invoices,
-      setProofs: _setProofs,
-      setInvoices: setInvoices,
-    );
-
     _homeTab = Home(
+      cashu: cashu,
       balance: balance,
+      setInvoices: setLightningTransactions,
       activeBalance: activeBalance,
       activeMint: activeMint,
       tokenData: tokenData,
-      pendingTransactions: pendingTransactions,
-      transactions: transactions,
+      pendingCashuTransactions: pendingCashuTransactions,
+      cashuTransactions: cashuTransactions,
+      pendingLightningTransactions: pendingLightningTransactions,
+      lightningTransactions: lightningTransactions,
       mints: mints,
       decodeToken: _decodeToken,
       clearToken: clearToken,
       receiveToken: receiveToken,
       send: sendToken,
       addMint: _addNewMint,
-      checkTransactionStatus: _checkTransactionStatus,
+      checkTransactionStatus: _checkCashuTransactionStatus,
+      checkLightningTransaction: _checkLightningTransactionStatus,
     );
 
     _settingsTab = Settings(
@@ -126,7 +119,7 @@ class MyHomePageState extends State<MyHomePage> {
     );
 
     _widgetOptions = <Widget>[
-      _lightningTab,
+      // _lightningTab,
       _homeTab,
       _settingsTab,
     ];
@@ -139,10 +132,6 @@ class MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bolt),
-            label: 'Lightning',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.payments),
             label: 'Home',
@@ -195,25 +184,47 @@ class MyHomePageState extends State<MyHomePage> {
     return r;
   }
 
-  Future<bool> _checkTransactionStatus(Transaction transaction) async {
+  Future<bool> _checkCashuTransactionStatus(
+      CashuTransaction transaction) async {
     final spendable =
         await cashu.checkSpendable(transaction.token.encodedToken);
 
     if (spendable == false) {
       setState(() {
-        pendingTransactions.removeWhere(
+        pendingCashuTransactions.removeWhere(
             (t) => t.token.encodedToken == transaction.token.encodedToken);
-        if (!transactions.any(
+        if (!cashuTransactions.any(
             (t) => t.token.encodedToken == transaction.token.encodedToken)) {
           transaction.status = TransactionStatus.sent;
-          transactions.add(transaction);
+          cashuTransactions.add(transaction);
         }
       });
     }
 
-    await _saveTransactions();
-    await _loadTransactions();
+    await _saveCashuTransactions();
+    await _loadCashuTransactions();
     return spendable;
+  }
+
+  Future<void> _checkLightningTransactionStatus(
+      LightningTransaction transaction) async {
+    final proofs = await cashu.mint(
+        transaction.amount, transaction.invoice.hash, transaction.mintUrl);
+
+    if (!proofs.startsWith("Error")) {
+      setState(() {
+        pendingLightningTransactions
+            .removeWhere((t) => t.invoice.hash == transaction.invoice.hash);
+        if (!lightningTransactions
+            .any((t) => t.invoice.hash == transaction.invoice.hash)) {
+          transaction.status = TransactionStatus.received;
+          lightningTransactions.add(transaction);
+        }
+      });
+    }
+
+    await _saveLightningTransactions();
+    await _loadLightningTransactions();
   }
 
   void clearToken() async {
@@ -227,14 +238,16 @@ class MyHomePageState extends State<MyHomePage> {
       String proofs = await cashu.receiveToken(tokenData!.encodedToken);
       // REVIEW: how does this handle a failed token that shouldned be added
       setState(() {
-        Transaction transaction = Transaction(
+        CashuTransaction transaction = CashuTransaction(
             status: TransactionStatus.received,
             time: DateTime.now(),
+            amount: tokenData!.amount,
+            mintUrl: tokenData!.mint,
             token: tokenData!);
-        transactions.add(transaction);
+        cashuTransactions.add(transaction);
       });
 
-      await _saveTransactions();
+      await _saveCashuTransactions();
       await _setProofs(proofs);
       await _getBalances();
     }
@@ -248,13 +261,15 @@ class MyHomePageState extends State<MyHomePage> {
     String token = await cashu.send(amount, activeMint!);
     TokenData tokenData = await _decodeToken(token);
     setState(() {
-      Transaction transaction = Transaction(
+      CashuTransaction transaction = CashuTransaction(
           status: TransactionStatus.pending,
           time: DateTime.now(),
+          amount: tokenData.amount,
+          mintUrl: tokenData.mint,
           token: tokenData);
-      pendingTransactions.add(transaction);
+      pendingCashuTransactions.add(transaction);
     });
-    await _saveTransactions();
+    await _saveCashuTransactions();
 
     // Get Proofs from rust
     // Since sending is handled by rust we dont know what proof(s) is spend directly
@@ -317,39 +332,39 @@ class MyHomePageState extends State<MyHomePage> {
     _getBalance();
   }
 
-  Future<void> _loadTransactions() async {
+  Future<void> _loadCashuTransactions() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> transactionsJson = prefs.getStringList('transactions') ?? [];
 
-    List<Transaction> loadedTransactions = transactionsJson
+    List<CashuTransaction> loadedTransactions = transactionsJson
         .map((jsonString) => json.decode(jsonString))
-        .map((jsonMap) => Transaction.fromJson(jsonMap))
+        .map((jsonMap) => CashuTransaction.fromJson(jsonMap))
         .toList();
 
     List<String> pendingTransactionsJson =
         prefs.getStringList('pending_transactions') ?? [];
 
-    List<Transaction> loadedPendingTransactions = pendingTransactionsJson
+    List<CashuTransaction> loadedPendingTransactions = pendingTransactionsJson
         .map((jsonString) => json.decode(jsonString))
-        .map((jsonMap) => Transaction.fromJson(jsonMap))
+        .map((jsonMap) => CashuTransaction.fromJson(jsonMap))
         .toList();
 
     setState(() {
-      transactions = loadedTransactions;
-      pendingTransactions = loadedPendingTransactions;
+      cashuTransactions = loadedTransactions;
+      pendingCashuTransactions = loadedPendingTransactions;
     });
   }
 
-  Future<void> _saveTransactions() async {
+  Future<void> _saveCashuTransactions() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> transactionsJson = transactions
+    List<String> transactionsJson = cashuTransactions
         .map((transaction) => transaction.toJson())
         .map((jsonMap) => json.encode(jsonMap))
         .toList();
 
     await prefs.setStringList('transactions', transactionsJson);
 
-    List<String> pendingTransactionsJson = pendingTransactions
+    List<String> pendingTransactionsJson = pendingCashuTransactions
         .map((transaction) => transaction.toJson())
         .map((jsonMap) => json.encode(jsonMap))
         .toList();
@@ -357,48 +372,49 @@ class MyHomePageState extends State<MyHomePage> {
     await prefs.setStringList('pending_transactions', pendingTransactionsJson);
   }
 
-  void setInvoices(
-      List<Invoice> passedPendingInvoices, List<Invoice> passedInvoices) async {
+  void setLightningTransactions(
+      List<LightningTransaction> passedPendingTransactions,
+      List<LightningTransaction> passedTransactions) async {
     setState(() {
-      invoices = passedInvoices;
-      pendingInvoices = passedPendingInvoices;
+      lightningTransactions = passedTransactions;
+      pendingLightningTransactions = passedPendingTransactions;
     });
-    await _saveInvoices();
+    await _saveLightningTransactions();
   }
 
-  Future<void> _loadInvoices() async {
+  Future<void> _loadLightningTransactions() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> invoicesJson = prefs.getStringList('invoices') ?? [];
 
-    List<Invoice> loadedInvoices = invoicesJson
+    List<LightningTransaction> loadedInvoices = invoicesJson
         .map((jsonString) => json.decode(jsonString))
-        .map((jsonMap) => Invoice.fromJson(jsonMap))
+        .map((jsonMap) => LightningTransaction.fromJson(jsonMap))
         .toList();
 
     List<String> pendingInvoicesJson =
         prefs.getStringList('pending_invoices') ?? [];
 
-    List<Invoice> loadedPendingInvoices = pendingInvoicesJson
+    List<LightningTransaction> loadedPendingInvoices = pendingInvoicesJson
         .map((jsonString) => json.decode(jsonString))
-        .map((jsonMap) => Invoice.fromJson(jsonMap))
+        .map((jsonMap) => LightningTransaction.fromJson(jsonMap))
         .toList();
 
     setState(() {
-      invoices = loadedInvoices;
-      pendingInvoices = loadedPendingInvoices;
+      lightningTransactions = loadedInvoices;
+      pendingLightningTransactions = loadedPendingInvoices;
     });
   }
 
-  Future<void> _saveInvoices() async {
+  Future<void> _saveLightningTransactions() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> invoicesJson = invoices
+    List<String> invoicesJson = lightningTransactions
         .map((invoice) => invoice.toJson())
         .map((jsonMap) => json.encode(jsonMap))
         .toList();
 
     await prefs.setStringList('invoices', invoicesJson);
 
-    List<String> pendingInvoicesJson = pendingInvoices
+    List<String> pendingInvoicesJson = pendingLightningTransactions
         .map((invoice) => invoice.toJson())
         .map((jsonMap) => json.encode(jsonMap))
         .toList();

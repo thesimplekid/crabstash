@@ -50,8 +50,6 @@ class PayInvoiceState extends State<PayInvoice> {
       invoice: encodedInvoice,
       hash: data[1],
       mintUrl: _mint,
-      status: InvoiceStatus.pending,
-      time: DateTime.now(),
       memo: data.length > 2 ? data[2] : null,
     );
 

@@ -1,17 +1,17 @@
+import 'package:crabstash/shared/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:cashu/cashu.dart';
 
 import '../shared/models/token.dart';
 import '../shared/widgets/numeric_input.dart';
-import '../shared/models/invoice.dart';
 import '../screens/invoice_info.dart';
 
 class CreateInvoice extends StatefulWidget {
   final Cashu cashu;
   final Map<String, int> mints;
   final String activeMint;
-  final List<Invoice> pendingInvoices;
-  final List<Invoice> invoices;
+  final List<LightningTransaction> pendingInvoices;
+  final List<LightningTransaction> invoices;
   final Function setInvoices;
 
   const CreateInvoice({
