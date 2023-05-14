@@ -54,85 +54,88 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(top: 20.0),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 120.0,
-              child: Column(
-                children: [
-                  const Text(
-                    "Active Mint Balance",
-                    style: TextStyle(
-                      fontSize: 18.0,
-                    ),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 120.0,
+            child: Column(
+              children: [
+                const Text(
+                  "Active Mint Balance",
+                  style: TextStyle(
+                    fontSize: 18.0,
                   ),
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.activeBalance.toString(),
-                          style: const TextStyle(
-                            fontSize: 60.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ), // Balance Text
-                        const SizedBox(
-                          height: 60.0,
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Text(" sats"),
-                          ),
+                ),
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.activeBalance.toString(),
+                        style: const TextStyle(
+                          fontSize: 60.0,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
+                      ), // Balance Text
+                      const SizedBox(
+                        height: 60.0,
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Text(" sats"),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ), // Balance Container
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.balance),
-                  Text(
-                    " Total Balance: ${widget.balance.toString()} sats",
+                ),
+              ],
+            ),
+          ), // Balance Container
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.balance),
+                Text(
+                  " Total Balance: ${widget.balance.toString()} sats",
+                  style: const TextStyle(
+                    fontSize: 20.0,
+                  ),
+                )
+              ],
+            ),
+          ),
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.home),
+                Flexible(
+                  child: Text(
+                    (widget.activeMint != null)
+                        ? " ${widget.activeMint!}"
+                        : ' no mint set',
                     style: const TextStyle(
                       fontSize: 20.0,
                     ),
-                  )
-                ],
-              ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.home),
-                  Flexible(
-                    child: Text(
-                      (widget.activeMint != null)
-                          ? " ${widget.activeMint!}"
-                          : ' No Mint set',
-                      style: const TextStyle(
-                        fontSize: 20.0,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.pendingTransactions.isNotEmpty)
+                  // crossAxisAlignment: CrossAxisAlignment.start,
+                  const Text(
+                    "Pending Transactions",
+                    style: TextStyle(
+                      fontSize: 20.0,
                     ),
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  if (widget.pendingTransactions.isNotEmpty)
-                    //crossAxisAlignment: CrossAxisAlignment.start,
-                    const Text(
-                      "Pending Transactions",
-                    ),
+                if (widget.pendingTransactions.isNotEmpty)
                   Flexible(
                     child: TransactionList(
                       transactions: widget.pendingTransactions,
@@ -140,70 +143,72 @@ class _HomeState extends State<Home> {
                       sendToken: _sendTokenDialog,
                     ),
                   ),
-                  const Text(
-                    "Transactions",
-                    textAlign: TextAlign.left,
+                const Text(
+                  "Transactions",
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: 20.0,
                   ),
-                  Flexible(
-                    child: TransactionList(
-                        transactions: widget.transactions,
-                        checkSpendable: null,
-                        sendToken: _sendTokenDialog),
-                  ),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: TransactionList(
+                      transactions: widget.transactions,
+                      checkSpendable: null,
+                      sendToken: _sendTokenDialog),
+                ),
+              ],
             ),
-            Row(
-              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 70),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SendToken(
-                            decodeToken: widget.decodeToken,
-                            send: widget.send,
-                            activeMint: widget.activeMint,
-                            activeBalance: widget.activeBalance,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Text('Send'),
+          ),
+          Row(
+            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 70),
                   ),
-                ),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 70),
-                    ),
-                    onPressed: () {
-                      widget.clearToken();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ReceviceToken(
-                            decodeToken: widget.decodeToken,
-                            receiveToken: widget.receiveToken,
-                            mints: widget.mints,
-                            addMint: widget.addMint,
-                          ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SendToken(
+                          decodeToken: widget.decodeToken,
+                          send: widget.send,
+                          activeMint: widget.activeMint,
+                          activeBalance: widget.activeBalance,
                         ),
-                      );
-                    },
-                    child: const Text('Receive'),
-                  ),
+                      ),
+                    );
+                  },
+                  child: const Text('Send'),
                 ),
-              ], // Button row children
-            ), // Button Row
-          ], // body children
-        ), // Body column
-      ),
+              ),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 70),
+                  ),
+                  onPressed: () {
+                    widget.clearToken();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReceviceToken(
+                          decodeToken: widget.decodeToken,
+                          receiveToken: widget.receiveToken,
+                          mints: widget.mints,
+                          addMint: widget.addMint,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Receive'),
+                ),
+              ),
+            ], // Button row children
+          ), // Button Row
+        ], // body children
+      ), // Body column
     );
   } // Build widget
 

@@ -74,54 +74,41 @@ class _LightningState extends State<Lightning> {
           children: [
             Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (widget.pendingInvoices.isNotEmpty)
-                    Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Pending Invoices",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Flexible(
-                            child: InvoiceList(
-                              invoices: widget.pendingInvoices,
-                              checkSpendable: mintInvoice,
-                              setProofs: widget.setProofs,
-                              showInvoice: _createInvoiceDialog,
-                            ),
-                          ),
-                        ],
+                    const Text(
+                      "Pending Invoices",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  if (widget.invoices.isNotEmpty)
+                  if (widget.pendingInvoices.isNotEmpty)
                     Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Invoices",
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Flexible(
-                            child: InvoiceList(
-                              invoices: widget.invoices,
-                              checkSpendable: null,
-                              setProofs: widget.setProofs,
-                              showInvoice: _createInvoiceDialog,
-                            ),
-                          ),
-                        ],
+                      child: InvoiceList(
+                        invoices: widget.pendingInvoices,
+                        checkSpendable: mintInvoice,
+                        setProofs: widget.setProofs,
+                        showInvoice: _createInvoiceDialog,
                       ),
                     ),
+                  const Text(
+                    "Invoices",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Flexible(
+                    child: InvoiceList(
+                      invoices: widget.invoices,
+                      checkSpendable: null,
+                      setProofs: widget.setProofs,
+                      showInvoice: _createInvoiceDialog,
+                    ),
+                  ),
                 ],
               ),
             ),
