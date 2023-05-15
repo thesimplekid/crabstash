@@ -71,52 +71,50 @@ class TokenInfoState extends State<TokenInfo> {
         ),
         body: Column(
           children: [
-            Container(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 400,
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 300,
-                          child: SingleChildScrollView(
-                            child: Text(displayToken!.encodedToken),
-                          ),
+            Column(
+              children: [
+                SizedBox(
+                  height: 400,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 300,
+                        child: SingleChildScrollView(
+                          child: Text(displayToken!.encodedToken),
                         ),
-                        Text("Mint: ${displayToken!.mint}"),
-                        Wrap(
-                          children: [
-                            Text(
-                              "Token amount: ${displayToken!.amount.toString()}",
-                            ),
-                          ],
-                        ), // Wrap
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      await Clipboard.setData(
-                          ClipboardData(text: displayToken!.encodedToken));
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Copied to clipboard'),
+                      ),
+                      Text("Mint: ${displayToken!.mint}"),
+                      Wrap(
+                        children: [
+                          Text(
+                            "Token amount: ${displayToken!.amount.toString()}",
                           ),
-                        );
-                      }
-                    },
-                    child: const Text('Copy'),
+                        ],
+                      ), // Wrap
+                    ],
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await Clipboard.setData(
+                        ClipboardData(text: displayToken!.encodedToken));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Copied to clipboard'),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Copy'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
             ),
           ],
         ),

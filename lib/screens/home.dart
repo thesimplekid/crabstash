@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cashu/cashu.dart';
 
-import '../screens/send_token.dart';
-import '../screens/receive_token.dart';
+import '../screens/send.dart';
+import '../screens/receive.dart';
 import '../shared/models/transaction.dart';
 import '../shared/models/token.dart';
 import '../shared/utils.dart';
@@ -456,7 +456,7 @@ class TransactionList extends StatelessWidget {
                     const Text(
                       // TODO: Show real memo
                       "No Memo",
-                      style: const TextStyle(fontSize: 20),
+                      style: TextStyle(fontSize: 20),
                     ),
                     Text(
                       formatTimeAgo(transaction.time),
