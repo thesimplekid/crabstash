@@ -38,7 +38,6 @@ class PayInvoiceState extends State<PayInvoice> {
     }
 
     // Start listening to changes.
-    // TODO: On change attempt to decode
     receiveController.addListener(_decodeInvoice);
   }
 
@@ -62,7 +61,6 @@ class PayInvoiceState extends State<PayInvoice> {
     String res = await widget.cashu
         .payInvoice(invoice!.amount, invoice!.invoice!, _mint);
     widget.setProofs(res);
-    // TODO: call to set proofs
   }
 
   @override

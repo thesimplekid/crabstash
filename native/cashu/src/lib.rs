@@ -282,7 +282,7 @@ pub async fn mint(amount: u64, hash: &str, mint: &str) -> Result<String, CashuEr
     Err(CashuError("Could not get invoice".to_string()))
 }
 
-// TODO: Melt
+// TODO: Melt, untested as legend.lnbits has LN issues
 pub async fn melt(amount: u64, invoice: &str, mint: &str) -> Result<String, CashuError> {
     let wallet = wallet_for_url(mint).await?;
 
@@ -302,7 +302,7 @@ pub async fn melt(amount: u64, invoice: &str, mint: &str) -> Result<String, Cash
     get_proofs().await
 }
 
-// TODO: Decode invoice
+/// Decode invoice
 pub async fn decode_invoice(invoice: &str) -> Result<InvoiceInfo, CashuError> {
     let invoice = str::parse::<Invoice>(&invoice).unwrap();
 
@@ -312,7 +312,7 @@ pub async fn decode_invoice(invoice: &str) -> Result<InvoiceInfo, CashuError> {
     };
 
     Ok(InvoiceInfo {
-        // FIXME:
+        // FIXME: Convert this conrrectlly
         amount: invoice.amount_milli_satoshis().unwrap() / 1000,
         hash: invoice.payment_hash().to_string(),
         memo,

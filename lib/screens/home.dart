@@ -246,7 +246,6 @@ class _HomeState extends State<Home> {
   void _createLightningDialog(int amount, String mintUrl,
       LightningTransaction passedTransaction) async {
     if (context.mounted) {
-      // TODO Decode invoice
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -429,7 +428,6 @@ class TransactionList extends StatelessWidget {
 
           return GestureDetector(
             onTap: () {
-              // TODO: show transaction info
               if (transaction is CashuTransaction) {
                 sendToken(transaction.amount, transaction.token);
               } else if (transaction is LightningTransaction) {

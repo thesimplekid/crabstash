@@ -30,7 +30,6 @@ class _ReceiveFormState extends State<ReceiveForm> {
     super.initState();
 
     // Start listening to changes.
-    // TODO: On change attempt to decode
     receiveController.addListener(_decodeToken);
   }
 
