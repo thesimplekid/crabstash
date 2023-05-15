@@ -67,45 +67,62 @@ class ReceiveTokenState extends State<ReceviceToken> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Receive Token'),
+        title: const Text('Receive'),
       ),
       body: Center(
         child: Column(
           children: [
+            const Text(
+              "Receive ECash",
+              style: TextStyle(fontSize: 20),
+            ),
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Receive Token',
+                labelText: 'Paste Token',
               ),
               onChanged: (value) async {
                 await _decodeToken();
               },
               controller: receiveController,
             ),
+            const SizedBox(
+              height: 50,
+            ),
             if (tokenData == null)
-              Flexible(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 70),
-                  ),
-                  onPressed: () {
-                    if (widget.activeWallet != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CreateInvoice(
-                            cashu: widget.cashu,
-                            mints: widget.mints,
-                            activeMint: widget.activeWallet!,
-                            pendingInvoices: widget.pendingInvoices,
-                            invoices: widget.invoices,
-                            setInvoices: widget.setInvoices,
+              Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 70),
+                    ),
+                    onPressed: () {
+                      if (widget.activeWallet != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CreateInvoice(
+                              cashu: widget.cashu,
+                              mints: widget.mints,
+                              activeMint: widget.activeWallet!,
+                              pendingInvoices: widget.pendingInvoices,
+                              invoices: widget.invoices,
+                              setInvoices: widget.setInvoices,
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Create Invoice'),
-                ),
+                        );
+                      }
+                    },
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.bolt),
+                          Text(
+                            'Receive via Lighting',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ]),
+                  ),
+                ],
               ),
             if (tokenData != null)
               Column(
