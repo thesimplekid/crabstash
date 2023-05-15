@@ -75,14 +75,14 @@ class PayInvoiceState extends State<PayInvoice> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pay Invoice'),
+        title: Row(children: const [Icon(Icons.bolt), Text('Pay Invoice')]),
       ),
       body: Center(
         child: Column(
           children: [
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Receive Token',
+                labelText: 'bolt11 invoice',
               ),
               onChanged: (value) async {
                 await _decodeInvoice();

@@ -108,6 +108,7 @@ class MyHomePageState extends State<MyHomePage> {
       addMint: _addNewMint,
       checkTransactionStatus: _checkCashuTransactionStatus,
       checkLightningTransaction: _checkLightningTransactionStatus,
+      setProofs: _setProofs,
     );
 
     _settingsTab = Settings(

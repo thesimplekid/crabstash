@@ -27,6 +27,7 @@ class Home extends StatefulWidget {
   final Function checkTransactionStatus;
   final Function checkLightningTransaction;
   final Function setInvoices;
+  final Function setProofs;
 
   const Home(
       {super.key,
@@ -47,6 +48,7 @@ class Home extends StatefulWidget {
       required this.checkTransactionStatus,
       required this.checkLightningTransaction,
       required this.setInvoices,
+      required this.setProofs,
       this.tokenData});
 
   @override
@@ -197,7 +199,11 @@ class _HomeState extends State<Home> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SendToken(
+                        builder: (context) => Send(
+                          setInvoices: widget.setInvoices,
+                          setProofs: widget.setProofs,
+                          cashu: widget.cashu,
+                          wallets: widget.mints,
                           decodeToken: widget.decodeToken,
                           send: widget.send,
                           activeMint: widget.activeMint,
