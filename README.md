@@ -1,6 +1,9 @@
 > **Warning**
 > This project is in early development, it does however work with real sats! Always use amounts you don't mind loosing.
 
+
+## Moved to [cashcrab](https://github.com/thesimplekid/cashcrab)
+
 # crabstash
 
 A [Cashu](https://github.com/cashubtc/cashu) wallet with a flutter UI and with as much logic as possible in rust using [cashu-crab](https://github.com/thesimplekid/cashu-crab). 
